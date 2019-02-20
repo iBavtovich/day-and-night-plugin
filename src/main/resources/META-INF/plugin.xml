@@ -1,24 +1,29 @@
 <idea-plugin>
     <id>com.daynight.plugin</id>
-    <name>Plugin display name here</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <name>Day And Night</name>
+    <vendor email="ignatbav@gmail.com">Ignat Bavtovich</vendor>
+    <description>This plugin added possibility for automatic color scheme changes according user's schedule settings</description>
 
-    <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
-    ]]></description>
+    <depends>com.intellij.modules.platform</depends>
 
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
-    <!-- uncomment to enable plugin in all products
-    <depends>com.intellij.modules.lang</depends>
-    -->
+    <application-components>
+        <component>
+            <implementation-class>com.daynight.plugin.components.PluginPropertiesComponent</implementation-class>
+        </component>
+        <component>
+            <implementation-class>com.daynight.plugin.components.ChangeSchemeOnStartUpComponent</implementation-class>
+        </component>
+        <component>
+            <implementation-class>com.daynight.plugin.components.ScheduledTasksComponent</implementation-class>
+        </component>
+    </application-components>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
+        <applicationConfigurable groupId="other" displayName="Day and Night" id="preference.DayNightConfigurable"
+                                 instance="com.daynight.plugin.configuration.DayNightConfigurable" />
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
+        <action id="DayNightChangeColor" class="com.daynight.plugin.actions.ChangeColorSchemeAction" text="DayNightChangeColor"/>
     </actions>
 </idea-plugin>

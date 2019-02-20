@@ -1,26 +1,37 @@
 plugins {
-    id 'java'
     id 'org.jetbrains.intellij' version '0.4.2'
 }
 
+apply plugin: 'java'
+
 group 'com.daynight'
-version '1.0-SNAPSHOT'
+version '1.0'
 
 sourceCompatibility = 1.8
+
+intellij {
+    version '2018.3'
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compileOnly 'org.projectlombok:lombok:1.18.6'
+    compile 'com.github.lgooddatepicker:LGoodDatePicker:10.3.1'
+}
+
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-}
-
-intellij {
-    version '2018.3.4'
-}
 patchPluginXml {
+    untilBuild '191.*'
     changeNotes """
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>"""
+      First release of plugin.<br>
+      <em>Version: 1.0</em>"""
 }

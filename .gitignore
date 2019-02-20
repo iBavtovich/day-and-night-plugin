@@ -44,6 +44,7 @@ hs_err_pid*
 
 # User-specific stuff
 .idea
+*.iml
 
 # File-based project format
 *.iws

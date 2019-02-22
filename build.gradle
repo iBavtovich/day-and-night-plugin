@@ -5,7 +5,7 @@ plugins {
 apply plugin: 'java'
 
 group 'com.daynight'
-version '1.0'
+version '1.0.1'
 
 sourceCompatibility = 1.8
 
@@ -32,6 +32,6 @@ repositories {
 patchPluginXml {
     untilBuild '191.*'
     changeNotes """
-      First release of plugin.<br>
-      <em>Version: 1.0</em>"""
+      Fixed naming of enable checkbox.<br>
+      <em>Version: 1.0.1</em>"""
 }

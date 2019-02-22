@@ -99,7 +99,7 @@
         <properties>
           <enabled value="true"/>
           <selected value="false"/>
-          <text value="Change scheme if possible after apply"/>
+          <text value="Enable automatic color scheme changes"/>
         </properties>
         <clientProperties>
           <hideActionText class="java.lang.Boolean" value="false"/>

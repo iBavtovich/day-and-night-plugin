@@ -11,12 +11,12 @@ public class ChangeSchemeOnStartUpComponent {
     final ScheduledTasksComponent tasksComponent;
     public ChangeSchemeOnStartUpComponent(ScheduledTasksComponent tasksComponent) {
         this.tasksComponent = tasksComponent;
-        changeColorSchemeIfNecessary();
+        changeLookAndFeelIfNeeded();
         tasksComponent.submitTasksIfNeeded();
     }
 
-    private void changeColorSchemeIfNecessary() {
-        AnAction dayNightChangeColor = ActionManager.getInstance().getAction("DayNightChangeColor");
-        dayNightChangeColor.actionPerformed(null);
+    private void changeLookAndFeelIfNeeded() {
+        AnAction dayNightChangeLaF = ActionManager.getInstance().getAction("DayNightChangeColor");
+        dayNightChangeLaF.actionPerformed(null);
     }
 }

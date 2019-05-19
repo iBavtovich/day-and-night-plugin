@@ -2,74 +2,80 @@ package com.daynight.plugin.actions;
 
 import com.daynight.plugin.components.PluginPropertiesComponent;
 import com.daynight.plugin.components.PluginPropertiesComponent.State;
-import com.daynight.plugin.utils.TimeUtils;
 import com.intellij.ide.ui.LafManager;
-import com.intellij.ide.ui.UITheme;
-import com.intellij.ide.ui.laf.LafManagerImpl;
-import com.intellij.ide.ui.laf.UIThemeBasedLookAndFeelInfo;
+import com.intellij.ide.ui.LafManagerListener;
 import com.intellij.ide.ui.laf.darcula.DarculaInstaller;
-import com.intellij.ide.ui.laf.darcula.DarculaLookAndFeelInfo;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.colors.impl.EditorColorsManagerImpl;
-import com.intellij.openapi.options.SchemeManager;
+import com.intellij.openapi.util.Ref;
 import com.intellij.ui.ColorUtil;
 import com.intellij.util.ui.UIUtil;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
 
+import static com.intellij.openapi.editor.colors.EditorColorsManager.DEFAULT_SCHEME_NAME;
+
 public class ChangeColorSchemeAction extends AnAction {
 
     @Override
     public void actionPerformed(@Nullable AnActionEvent e) {
         State state = PluginPropertiesComponent.getInstance().getState();
-        EditorColorsScheme schemeForSwitch = getSchemeForCurrentTime(state);
+        if (state.isEnabled()) {
+            EditorColorsScheme schemeForSwitch = getSchemeForCurrentTime(state);
+            UIManager.LookAndFeelInfo themeForSwitch = getLaFForCurrentTime(state);
 
-        changeColorSchemeIfNecessary(schemeForSwitch);
+            changeLaFIfNecessary(themeForSwitch, schemeForSwitch);
+            if (!state.isSchemePickDisabled()) {
+                SwingUtilities.invokeLater(() -> EditorColorsManager.getInstance().setGlobalScheme(schemeForSwitch));
+            }
+        }
     }
 
     private EditorColorsScheme getSchemeForCurrentTime(State state) {
         EditorColorsManagerImpl colorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
-        if (state.isEnabled()) {
-            if (TimeUtils.isDayNow(state)) {
-                return colorsManager.getScheme(state.getDaySchemeName());
-            } else {
-                return colorsManager.getScheme(state.getNightSchemeName());
-            }
-        } else {
-            return colorsManager.getGlobalScheme();
-        }
+        String schemeName = state.getColorSchemeNameForCurrentTime();
+        return schemeName != null ? colorsManager.getScheme(schemeName) : colorsManager.getScheme(DEFAULT_SCHEME_NAME);
     }
 
-    private static void changeColorSchemeIfNecessary(EditorColorsScheme scheme) {
-        final LafManager lafManager = LafManager.getInstance();
-        boolean isDarkEditorTheme = ColorUtil.isDark(scheme.getDefaultBackground());
+    private UIManager.LookAndFeelInfo getLaFForCurrentTime(State state) {
+        LafManager lafManager = LafManager.getInstance();
+        UIManager.LookAndFeelInfo[] installedLookAndFeels = lafManager.getInstalledLookAndFeels();
+        String themeName = state.getThemeNameForCurrentTime();
 
-        UIManager.LookAndFeelInfo suitableLaf = null;
-        String schemeName = SchemeManager.getDisplayName(scheme);
-        for (UIManager.LookAndFeelInfo laf : lafManager.getInstalledLookAndFeels()) {
-            if (laf instanceof UIThemeBasedLookAndFeelInfo &&
-                    schemeName.equals(((UIThemeBasedLookAndFeelInfo) laf).getTheme().getEditorSchemeName())) {
-                suitableLaf = laf;
-                break;
+        for (UIManager.LookAndFeelInfo lookAndFeel : installedLookAndFeels) {
+            if (lookAndFeel.getName().equals(themeName)) {
+                return lookAndFeel;
             }
         }
 
-        UIManager.LookAndFeelInfo currentLafInfo = lafManager.getCurrentLookAndFeel();
-        UITheme theme = currentLafInfo instanceof UIThemeBasedLookAndFeelInfo ?
-                ((UIThemeBasedLookAndFeelInfo) currentLafInfo).getTheme() : null;
+        return lafManager.getCurrentLookAndFeel();
+    }
 
-        if (isDarkEditorTheme && (UIUtil.isUnderIntelliJLaF() || theme != null && !theme.isDark())) {
-            lafManager.setCurrentLookAndFeel(suitableLaf != null ? suitableLaf : new DarculaLookAndFeelInfo());
-            lafManager.updateUI();
-            SwingUtilities.invokeLater(DarculaInstaller::install);
-        } else if (!isDarkEditorTheme && (UIUtil.isUnderDarcula() || theme != null && theme.isDark())) {
-            lafManager.setCurrentLookAndFeel(suitableLaf != null ? suitableLaf : ((LafManagerImpl) lafManager).getDefaultLaf());
-            lafManager.updateUI();
-            SwingUtilities.invokeLater(DarculaInstaller::uninstall);
+    private static void changeLaFIfNecessary(UIManager.LookAndFeelInfo themeForSwitch, EditorColorsScheme schemeForSwitch) {
+        final LafManager lafManager = LafManager.getInstance();
+        boolean wasDark = UIUtil.isUnderDarcula();
+
+        boolean isDarkTheme = ColorUtil.isDark(schemeForSwitch.getDefaultBackground());
+        lafManager.setCurrentLookAndFeel(themeForSwitch);
+
+        Ref<Boolean> updated = Ref.create(false);
+        LafManagerListener listener = s -> updated.set(true);
+        lafManager.addLafManagerListener(listener);
+        try {
+            if (UIUtil.isUnderDarcula()) {
+                DarculaInstaller.install();
+            } else if (wasDark) {
+                DarculaInstaller.uninstall();
+            }
+        } finally {
+            lafManager.removeLafManagerListener(listener);
+            if (!updated.get()) {
+                lafManager.updateUI();
+            }
         }
     }
 }

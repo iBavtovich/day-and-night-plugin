@@ -41,7 +41,7 @@ public class DayNightConfigurable implements SearchableConfigurable {
     public JComponent createComponent() {
         configGUI = new DayNightConfigurableGUI();
         configGUI.setAllSettingComponentsEnabled(propertiesComponent.getState().isEnabled());
-        configGUI.setSchemePickersPanelEnabled(propertiesComponent.getState().isSchemePickEnabled());
+        configGUI.setSchemePickersPanelEnabled(!propertiesComponent.getState().isSchemePickDisabled());
         return configGUI.getRootPanel();
     }
 

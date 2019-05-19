@@ -1,5 +1,6 @@
 package com.daynight.plugin.components;
 
+import com.daynight.plugin.utils.TimeUtils;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
@@ -9,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @State(
         name = "PluginPropertiesComponent",
@@ -42,7 +44,7 @@ public class PluginPropertiesComponent implements PersistentStateComponent<Plugi
     public static class State {
 
         boolean isEnabled;
-        boolean schemePickEnabled;
+        boolean schemePickDisabled;
         // Time in both cases is the number of minutes from midnight (e.g. 1 -> 0:01AM, 60 -> 1:00AM and so on)
         int dayStartTime;
         int nightStartTime;
@@ -52,5 +54,18 @@ public class PluginPropertiesComponent implements PersistentStateComponent<Plugi
 
         String dayThemeName;
         String nightThemeName;
+
+        @Nullable
+        public String getThemeNameForCurrentTime() {
+            return TimeUtils.isDayNow(this) ? dayThemeName : nightThemeName;
+        }
+
+        @Nullable
+        public String getColorSchemeNameForCurrentTime() {
+            if (schemePickDisabled) {
+                return null;
+            }
+            return TimeUtils.isDayNow(this) ? daySchemeName : nightSchemeName;
+        }
     }
 }

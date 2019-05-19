@@ -92,7 +92,7 @@ public class DayNightConfigurableGUI {
         nightTimePicker = createAndSetUpTimePicker(state.getNightStartTime());
 
         enableSchemePickCheckbox = new JCheckBox();
-        enableSchemePickCheckbox.setSelected(state.isSchemePickEnabled());
+        enableSchemePickCheckbox.setSelected(state.isSchemePickDisabled());
         enableSchemePickCheckbox.addItemListener(l -> {
             if (l.getStateChange() == ItemEvent.SELECTED) {
                 setSchemePickersPanelEnabled(false);
@@ -154,7 +154,7 @@ public class DayNightConfigurableGUI {
             changed |= (getTimeInMinutes(dayTimePicker.getTime()) != state.getDayStartTime());
             changed |= (getTimeInMinutes(nightTimePicker.getTime()) != state.getNightStartTime());
 
-            changed |= state.isSchemePickEnabled() != enableSchemePickCheckbox.isSelected();
+            changed |= state.isSchemePickDisabled() != enableSchemePickCheckbox.isSelected();
 
             if (!enableSchemePickCheckbox.isSelected()) {
                 changed |= !getColorSchemeNameFromPicker(daySchemePicker).equalsIgnoreCase(state.getDaySchemeName());
@@ -183,7 +183,7 @@ public class DayNightConfigurableGUI {
         state.setDayStartTime(dayStartTime);
         state.setNightStartTime(nightStartTime);
 
-        state.setSchemePickEnabled(enableSchemePickCheckbox.isSelected());
+        state.setSchemePickDisabled(enableSchemePickCheckbox.isSelected());
         state.setDaySchemeName(getColorSchemeNameFromPicker(daySchemePicker));
         state.setNightSchemeName(getColorSchemeNameFromPicker(nightSchemePicker));
 
@@ -202,7 +202,7 @@ public class DayNightConfigurableGUI {
 
         EditorColorsManagerImpl editorColorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
 
-        enableSchemePickCheckbox.setSelected(state.isSchemePickEnabled());
+        enableSchemePickCheckbox.setSelected(state.isSchemePickDisabled());
         daySchemePicker.setSelectedItem(editorColorsManager.getScheme(state.getDaySchemeName()));
         nightSchemePicker.setSelectedItem(editorColorsManager.getScheme(state.getNightSchemeName()));
     }

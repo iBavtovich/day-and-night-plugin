@@ -18,10 +18,10 @@ import org.jetbrains.annotations.NotNull;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PluginPropertiesComponent implements PersistentStateComponent<PluginPropertiesComponent.State> {
 
-    @NotNull
     State myState = new State();
 
     @Override
+    @NotNull
     public State getState() {
         return myState;
     }
@@ -42,11 +42,15 @@ public class PluginPropertiesComponent implements PersistentStateComponent<Plugi
     public static class State {
 
         boolean isEnabled;
+        boolean schemePickEnabled;
         // Time in both cases is the number of minutes from midnight (e.g. 1 -> 0:01AM, 60 -> 1:00AM and so on)
         int dayStartTime;
         int nightStartTime;
 
         String daySchemeName;
         String nightSchemeName;
+
+        String dayThemeName;
+        String nightThemeName;
     }
 }

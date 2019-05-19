@@ -3,11 +3,13 @@ package com.daynight.plugin.forms;
 import com.daynight.plugin.components.PluginPropertiesComponent;
 import com.github.lgooddatepicker.components.TimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
+import com.intellij.ide.ui.LafManager;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.colors.impl.EditorColorsManagerImpl;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -29,11 +31,15 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 public class DayNightConfigurableGUI {
     JPanel rootPanel;
     JPanel settingsPanel;
-    ComboBox daySchemePicker;
-    ComboBox nightSchemePicker;
+    ComboBox<UIManager.LookAndFeelInfo> dayThemePicker;
+    ComboBox<UIManager.LookAndFeelInfo> nightThemePicker;
     TimePicker dayTimePicker;
     TimePicker nightTimePicker;
-    JCheckBox changeSchNowCheckbox;
+    JCheckBox enablePluginCheckbox;
+    JCheckBox enableSchemePickCheckbox;
+    JPanel schemePickersPanel;
+    ComboBox<EditorColorsScheme> daySchemePicker;
+    ComboBox<EditorColorsScheme> nightSchemePicker;
 
     PluginPropertiesComponent config;
 
@@ -41,18 +47,42 @@ public class DayNightConfigurableGUI {
         config = PluginPropertiesComponent.getInstance();
         PluginPropertiesComponent.State state = config.getState();
 
-        settingsPanel = new JPanel();
-
         EditorColorsManagerImpl editorColorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
+        LafManager lafManager = LafManager.getInstance();
         EditorColorsScheme[] allColorSchemes = editorColorsManager.getAllSchemes();
+        UIManager.LookAndFeelInfo[] allThemes = lafManager.getInstalledLookAndFeels();
 
-        daySchemePicker = new ComboBox(allColorSchemes);
+        dayThemePicker = new ComboBox<>(allThemes);
+        dayThemePicker.setRenderer(new ListCellRendererWrapper<UIManager.LookAndFeelInfo>() {
+            @Override
+            public void customize(JList list, UIManager.LookAndFeelInfo value, int index, boolean selected, boolean hasFocus) {
+                setText(value.getName());
+            }
+        });
+        if (isEmpty(state.getDayThemeName())) {
+            state.setDayThemeName(lafManager.getCurrentLookAndFeel().getName());
+        }
+        dayThemePicker.setSelectedItem(lafManager.getCurrentLookAndFeel());
+
+        nightThemePicker = new ComboBox<>(allThemes);
+        nightThemePicker.setRenderer(new ListCellRendererWrapper<UIManager.LookAndFeelInfo>() {
+            @Override
+            public void customize(JList list, UIManager.LookAndFeelInfo value, int index, boolean selected, boolean hasFocus) {
+                setText(value.getName());
+            }
+        });
+        if (isEmpty(state.getNightThemeName())) {
+            state.setNightThemeName(lafManager.getCurrentLookAndFeel().getName());
+        }
+        nightThemePicker.setSelectedItem(lafManager.getCurrentLookAndFeel());
+
+        daySchemePicker = new ComboBox<>(allColorSchemes);
         if (isEmpty(state.getDaySchemeName())) {
             state.setDaySchemeName(editorColorsManager.getGlobalScheme().getName());
         }
         daySchemePicker.setSelectedItem(editorColorsManager.getScheme(state.getDaySchemeName()));
 
-        nightSchemePicker = new ComboBox(allColorSchemes);
+        nightSchemePicker = new ComboBox<>(allColorSchemes);
         if (isEmpty(state.getNightSchemeName())) {
             state.setNightSchemeName(editorColorsManager.getGlobalScheme().getName());
         }
@@ -61,23 +91,43 @@ public class DayNightConfigurableGUI {
         dayTimePicker = createAndSetUpTimePicker(state.getDayStartTime());
         nightTimePicker = createAndSetUpTimePicker(state.getNightStartTime());
 
-        changeSchNowCheckbox = new JCheckBox();
-        changeSchNowCheckbox.setSelected(state.isEnabled());
-        changeSchNowCheckbox.addItemListener(e -> {
+        enableSchemePickCheckbox = new JCheckBox();
+        enableSchemePickCheckbox.setSelected(state.isSchemePickEnabled());
+        enableSchemePickCheckbox.addItemListener(l -> {
+            if (l.getStateChange() == ItemEvent.SELECTED) {
+                setSchemePickersPanelEnabled(false);
+            } else {
+                setSchemePickersPanelEnabled(true);
+            }
+        });
 
+        enablePluginCheckbox = new JCheckBox();
+        enablePluginCheckbox.setSelected(state.isEnabled());
+        enablePluginCheckbox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 setAllSettingComponentsEnabled(true);
             } else {
                 setAllSettingComponentsEnabled(false);
             }
         });
-
     }
 
     public void setAllSettingComponentsEnabled(boolean b) {
-        Component[] components = settingsPanel.getComponents();
+        disableAllPanelComponents(settingsPanel, b);
+        setSchemePickersPanelEnabled(b && !enableSchemePickCheckbox.isSelected());
+    }
+
+    public void setSchemePickersPanelEnabled(boolean isEnabled) {
+        disableAllPanelComponents(schemePickersPanel, isEnabled);
+    }
+
+    private void disableAllPanelComponents(JPanel panel, boolean b) {
+        Component[] components = panel.getComponents();
         for (Component component : components) {
             component.setEnabled(b);
+            if (component instanceof JPanel) {
+                disableAllPanelComponents((JPanel) component, b);
+            }
         }
     }
 
@@ -86,36 +136,45 @@ public class DayNightConfigurableGUI {
         TimePickerSettings settings = new TimePickerSettings();
         settings.initialTime = dayStartTime;
         TimePicker timePicker = new TimePicker(settings);
-        timePicker.getComponentToggleTimeMenuButton().setSize(5, 100);
+        timePicker.getComponentToggleTimeMenuButton().setPreferredSize(new Dimension(30, 30));
         return timePicker;
     }
 
     public boolean isModified() {
         boolean changed = false;
         PluginPropertiesComponent.State state = config.getState();
-        boolean enableChangeScheme = changeSchNowCheckbox.isSelected();
+        boolean enablePlugin = enablePluginCheckbox.isSelected();
 
-        if (enableChangeScheme != state.isEnabled()) {
+        if (enablePlugin != state.isEnabled()) {
             changed = true;
         } else {
-            changed |= !getColorSchemeNameFromPicker(daySchemePicker).equalsIgnoreCase(state.getDaySchemeName());
-            changed |= !getColorSchemeNameFromPicker(nightSchemePicker).equalsIgnoreCase(state.getNightSchemeName());
+            changed |= !(state.getDayThemeName()).equalsIgnoreCase(((UIManager.LookAndFeelInfo) dayThemePicker.getSelectedItem()).getName());
+            changed |= !(state.getNightThemeName()).equalsIgnoreCase(((UIManager.LookAndFeelInfo) nightThemePicker.getSelectedItem()).getName());
+
             changed |= (getTimeInMinutes(dayTimePicker.getTime()) != state.getDayStartTime());
             changed |= (getTimeInMinutes(nightTimePicker.getTime()) != state.getNightStartTime());
+
+            changed |= state.isSchemePickEnabled() != enableSchemePickCheckbox.isSelected();
+
+            if (!enableSchemePickCheckbox.isSelected()) {
+                changed |= !getColorSchemeNameFromPicker(daySchemePicker).equalsIgnoreCase(state.getDaySchemeName());
+                changed |= !getColorSchemeNameFromPicker(nightSchemePicker).equalsIgnoreCase(state.getNightSchemeName());
+            }
         }
         return changed;
     }
 
-    private String getColorSchemeNameFromPicker(ComboBox daySchemePicker) {
-        return ((EditorColorsScheme) daySchemePicker.getSelectedItem()).getName();
+    private String getColorSchemeNameFromPicker(ComboBox schemePicker) {
+        return ((EditorColorsScheme) schemePicker.getSelectedItem()).getName();
     }
 
     public void applyChanges() throws ConfigurationException {
         PluginPropertiesComponent.State state = config.getState();
 
-        state.setEnabled(changeSchNowCheckbox.isSelected());
-        state.setDaySchemeName(getColorSchemeNameFromPicker(daySchemePicker));
-        state.setNightSchemeName(getColorSchemeNameFromPicker(nightSchemePicker));
+        state.setEnabled(enablePluginCheckbox.isSelected());
+        state.setDayThemeName(((UIManager.LookAndFeelInfo) dayThemePicker.getSelectedItem()).getName());
+        state.setNightThemeName(((UIManager.LookAndFeelInfo) nightThemePicker.getSelectedItem()).getName());
+
         int dayStartTime = getTimeInMinutes(dayTimePicker.getTime());
         int nightStartTime = getTimeInMinutes(nightTimePicker.getTime());
         if (dayStartTime == nightStartTime) {
@@ -124,21 +183,38 @@ public class DayNightConfigurableGUI {
         state.setDayStartTime(dayStartTime);
         state.setNightStartTime(nightStartTime);
 
-        config.loadState(state);
+        state.setSchemePickEnabled(enableSchemePickCheckbox.isSelected());
+        state.setDaySchemeName(getColorSchemeNameFromPicker(daySchemePicker));
+        state.setNightSchemeName(getColorSchemeNameFromPicker(nightSchemePicker));
 
+        config.loadState(state);
     }
 
     public void resetChanges() {
         PluginPropertiesComponent.State state = config.getState();
 
-        changeSchNowCheckbox.setSelected(state.isEnabled());
-
-        EditorColorsManagerImpl editorColorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
-        daySchemePicker.setSelectedItem(editorColorsManager.getScheme(state.getDaySchemeName()));
-        nightSchemePicker.setSelectedItem(editorColorsManager.getScheme(state.getNightSchemeName()));
+        enablePluginCheckbox.setSelected(state.isEnabled());
+        dayThemePicker.setSelectedItem(getThemeByName(state.getDayThemeName()));
+        nightThemePicker.setSelectedItem(getThemeByName(state.getNightThemeName()));
 
         dayTimePicker.setTime(getLocalTimeFromMinutes(state.getDayStartTime()));
         nightTimePicker.setTime(getLocalTimeFromMinutes(state.getNightStartTime()));
+
+        EditorColorsManagerImpl editorColorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
+
+        enableSchemePickCheckbox.setSelected(state.isSchemePickEnabled());
+        daySchemePicker.setSelectedItem(editorColorsManager.getScheme(state.getDaySchemeName()));
+        nightSchemePicker.setSelectedItem(editorColorsManager.getScheme(state.getNightSchemeName()));
+    }
+
+    private UIManager.LookAndFeelInfo getThemeByName(String dayThemeName) {
+        LafManager lafManager = LafManager.getInstance();
+        for (UIManager.LookAndFeelInfo lookAndFeel : lafManager.getInstalledLookAndFeels()) {
+            if (lookAndFeel.getName().equalsIgnoreCase(dayThemeName)) {
+                return lookAndFeel;
+            }
+        }
+        return lafManager.getCurrentLookAndFeel();
     }
 
     {
@@ -158,53 +234,50 @@ public class DayNightConfigurableGUI {
     private void $$$setupUI$$$() {
         createUIComponents();
         rootPanel = new JPanel();
-        rootPanel.setLayout(new GridLayoutManager(6, 4, new Insets(0, 0, 0, 0), -1, -1));
-        final Spacer spacer1 = new Spacer();
-        rootPanel.add(spacer1, new GridConstraints(0, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-                GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        rootPanel.add(spacer2, new GridConstraints(1, 0, 5, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
-                GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        rootPanel.setLayout(new GridLayoutManager(3, 1, new Insets(0, 10, 10, 10), -1, -1));
+        settingsPanel = new JPanel();
+        settingsPanel.setLayout(new GridLayoutManager(7, 3, new Insets(0, 0, 0, 0), -1, -1));
+        rootPanel.add(settingsPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
-        label1.setText("Choose day scheme");
-        rootPanel.add(label1,
-                new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-                        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        label1.setText("Day theme");
+        settingsPanel.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
         label2.setText("Day start time");
-        rootPanel.add(label2,
-                new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-                        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        settingsPanel.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label3 = new JLabel();
-        label3.setText("Choose night scheme");
-        rootPanel.add(label3,
-                new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-                        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        label3.setText("Night theme");
+        settingsPanel.add(label3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label4 = new JLabel();
         label4.setText("Night start time");
-        rootPanel.add(label4,
-                new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-                        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        settingsPanel.add(label4, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        settingsPanel.add(dayTimePicker, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(160, -1), new Dimension(160, -1), new Dimension(160, -1), 0, false));
+        settingsPanel.add(nightThemePicker, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(160, -1), new Dimension(160, -1), new Dimension(160, -1), 0, false));
+        settingsPanel.add(nightTimePicker, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(160, -1), new Dimension(160, -1), new Dimension(160, -1), 0, false));
+        final Spacer spacer1 = new Spacer();
+        settingsPanel.add(spacer1, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        settingsPanel.add(dayThemePicker, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(160, -1), new Dimension(160, -1), new Dimension(160, -1), 0, false));
+        schemePickersPanel = new JPanel();
+        schemePickersPanel.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
+        settingsPanel.add(schemePickersPanel, new GridConstraints(5, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JLabel label5 = new JLabel();
+        label5.setText("Day color scheme");
+        schemePickersPanel.add(label5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label6 = new JLabel();
+        label6.setText("Night color scheme");
+        schemePickersPanel.add(label6, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        schemePickersPanel.add(nightSchemePicker, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(160, -1), new Dimension(160, -1), new Dimension(160, -1), 0, false));
+        schemePickersPanel.add(daySchemePicker, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, new Dimension(160, -1), new Dimension(160, -1), new Dimension(160, -1), 0, false));
+        final Spacer spacer2 = new Spacer();
+        schemePickersPanel.add(spacer2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        enableSchemePickCheckbox.setText("Use default color scheme for selected theme");
+        settingsPanel.add(enableSchemePickCheckbox, new GridConstraints(4, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        enablePluginCheckbox.setEnabled(true);
+        enablePluginCheckbox.setSelected(false);
+        enablePluginCheckbox.setText("Enable automatic theme changes");
+        enablePluginCheckbox.putClientProperty("hideActionText", Boolean.FALSE);
+        rootPanel.add(enablePluginCheckbox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(269, 18), null, 0, false));
         final Spacer spacer3 = new Spacer();
-        rootPanel.add(spacer3, new GridConstraints(5, 2, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1,
-                GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        nightTimePicker = new TimePicker();
-        rootPanel.add(nightTimePicker, new GridConstraints(4, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final Spacer spacer4 = new Spacer();
-        rootPanel.add(spacer4, new GridConstraints(4, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-                GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        rootPanel.add(nightSchemePicker, new GridConstraints(3, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        rootPanel.add(daySchemePicker, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        dayTimePicker = new TimePicker();
-        rootPanel.add(dayTimePicker, new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        rootPanel.add(spacer3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
     }
 
     /**
@@ -213,4 +286,5 @@ public class DayNightConfigurableGUI {
     public JComponent $$$getRootComponent$$$() {
         return rootPanel;
     }
+
 }

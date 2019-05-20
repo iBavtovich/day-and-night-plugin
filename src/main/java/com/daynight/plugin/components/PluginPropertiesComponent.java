@@ -44,7 +44,7 @@ public class PluginPropertiesComponent implements PersistentStateComponent<Plugi
     public static class State {
 
         boolean isEnabled;
-        boolean schemePickDisabled;
+        boolean schemePickEnabled;
         // Time in both cases is the number of minutes from midnight (e.g. 1 -> 0:01AM, 60 -> 1:00AM and so on)
         int dayStartTime;
         int nightStartTime;
@@ -62,7 +62,7 @@ public class PluginPropertiesComponent implements PersistentStateComponent<Plugi
 
         @Nullable
         public String getColorSchemeNameForCurrentTime() {
-            if (schemePickDisabled) {
+            if (!schemePickEnabled) {
                 return null;
             }
             return TimeUtils.isDayNow(this) ? daySchemeName : nightSchemeName;

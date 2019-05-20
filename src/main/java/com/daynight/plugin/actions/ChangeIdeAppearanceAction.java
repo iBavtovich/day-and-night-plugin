@@ -28,7 +28,7 @@ public class ChangeIdeAppearanceAction extends AnAction {
             UIManager.LookAndFeelInfo themeForSwitch = getLaFForCurrentTime(state);
 
             changeLaFIfNecessary(themeForSwitch, schemeForSwitch);
-            if (!state.isSchemePickDisabled()) {
+            if (state.isSchemePickEnabled()) {
                 SwingUtilities.invokeLater(() -> EditorColorsManager.getInstance().setGlobalScheme(schemeForSwitch));
             }
         }

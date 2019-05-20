@@ -11,7 +11,6 @@ import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.colors.impl.EditorColorsManagerImpl;
 import com.intellij.openapi.util.Ref;
-import com.intellij.ui.ColorUtil;
 import com.intellij.util.ui.UIUtil;
 
 import javax.annotation.Nullable;
@@ -19,7 +18,7 @@ import javax.swing.*;
 
 import static com.intellij.openapi.editor.colors.EditorColorsManager.DEFAULT_SCHEME_NAME;
 
-public class ChangeColorSchemeAction extends AnAction {
+public class ChangeIdeAppearanceAction extends AnAction {
 
     @Override
     public void actionPerformed(@Nullable AnActionEvent e) {
@@ -59,7 +58,6 @@ public class ChangeColorSchemeAction extends AnAction {
         final LafManager lafManager = LafManager.getInstance();
         boolean wasDark = UIUtil.isUnderDarcula();
 
-        boolean isDarkTheme = ColorUtil.isDark(schemeForSwitch.getDefaultBackground());
         lafManager.setCurrentLookAndFeel(themeForSwitch);
 
         Ref<Boolean> updated = Ref.create(false);

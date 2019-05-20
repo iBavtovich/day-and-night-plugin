@@ -2,7 +2,7 @@
     <id>com.daynight.plugin</id>
     <name>Day And Night</name>
     <vendor email="ignatbav@gmail.com">Ignat Bavtovich</vendor>
-    <description>This plugin added possibility for automatic color scheme changes according user's schedule settings</description>
+    <description>This plugin added possibility for automatic theme and color scheme changes according user's schedule settings</description>
 
     <depends>com.intellij.modules.platform</depends>
 
@@ -24,6 +24,6 @@
     </extensions>
 
     <actions>
-        <action id="DayNightChangeColor" class="com.daynight.plugin.actions.ChangeColorSchemeAction" text="DayNightChangeColor"/>
+        <action id="DayNightChangeColor" class="com.daynight.plugin.actions.ChangeIdeAppearanceAction" text="DayNightChangeColor"/>
     </actions>
 </idea-plugin>

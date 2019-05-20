@@ -5,12 +5,12 @@ plugins {
 apply plugin: 'java'
 
 group 'com.daynight'
-version '1.0.1'
+version '1.0.2'
 
 sourceCompatibility = 1.8
 
 intellij {
-    version '2018.3'
+    version '2019.1'
 }
 
 dependencies {
@@ -32,6 +32,6 @@ repositories {
 patchPluginXml {
     untilBuild '191.*'
     changeNotes """
-      Fixed naming of enable checkbox.<br>
-      <em>Version: 1.0.1</em>"""
+      Added posibility for customizing day/night themes for IDE<br>
+      <em>Version: 1.0.2</em>"""
 }

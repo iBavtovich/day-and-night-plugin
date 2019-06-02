@@ -18,6 +18,12 @@
         </component>
     </application-components>
 
+    <project-components>
+        <component>
+            <implementation-class>com.daynight.plugin.components.WidgetInitComponent</implementation-class>
+        </component>
+    </project-components>
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable groupId="other" displayName="Day and Night" id="preference.DayNightConfigurable"
                                  instance="com.daynight.plugin.configuration.DayNightConfigurable" />
@@ -25,5 +31,6 @@
 
     <actions>
         <action id="DayNightChangeColor" class="com.daynight.plugin.actions.ChangeIdeAppearanceAction" text="DayNightChangeColor"/>
+        <action id="DayAndNight.ManualSwitching" class="com.daynight.plugin.actions.QuickSwitchAction" text="ManualSwitching"/>
     </actions>
 </idea-plugin>

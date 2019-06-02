@@ -5,7 +5,7 @@ plugins {
 apply plugin: 'java'
 
 group 'com.daynight'
-version '1.1.0'
+version '1.2.0'
 
 sourceCompatibility = 1.8
 
@@ -32,6 +32,7 @@ repositories {
 patchPluginXml {
     untilBuild '191.*'
     changeNotes """
-      Added posibility for customizing day/night themes for IDE<br>
-      <em>Version: 1.1.0</em>"""
+      Added icon to status bar, which can be used for manual switching between themes<br>
+      Added logo<br>
+      <em>Version: 1.2.0</em>"""
 }

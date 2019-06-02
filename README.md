@@ -12,6 +12,11 @@ Works on all InteliJ Platform based products such as InteliJ IDEA, WebStrom, And
 
 Now your theme and color scheme is changed according to your daily schedule! Enjoy it! 
 
+## Manual switching
+Now you are able to switch between your predefined settings manually.
+For this purpose use special widget at status bar of your IDE. 
+ ![Widget at status bar](https://github.com/iBavtovich/day-and-night-plugin/blob/master/files/status-bar-example.png)
+
 ## License
 The MIT License (MIT) see [License](LICENSE)
 

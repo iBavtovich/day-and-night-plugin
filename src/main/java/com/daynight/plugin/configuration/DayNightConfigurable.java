@@ -3,7 +3,11 @@ package com.daynight.plugin.configuration;
 import com.daynight.plugin.components.PluginPropertiesComponent;
 import com.daynight.plugin.components.ScheduledTasksComponent;
 import com.daynight.plugin.forms.DayNightConfigurableGUI;
+import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
 import lombok.AccessLevel;
@@ -63,7 +67,9 @@ public class DayNightConfigurable implements SearchableConfigurable {
         tasksComponent.cancelTasksIfExists();
         if (state.isEnabled()) {
             tasksComponent.submitTasksIfNeeded();
-            ActionManager.getInstance().getAction("DayNightChangeColor").actionPerformed(null);
+            DataContext dataContext = DataManager.getInstance().getDataContext(configGUI.getRootPanel());
+            AnActionEvent event = AnActionEvent.createFromDataContext(ActionPlaces.UNKNOWN, null, dataContext);
+            ActionManager.getInstance().getAction("DayNightChangeColor").actionPerformed(event);
         }
     }
 

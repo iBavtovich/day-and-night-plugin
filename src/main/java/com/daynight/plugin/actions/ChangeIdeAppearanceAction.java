@@ -24,8 +24,9 @@ public class ChangeIdeAppearanceAction extends AnAction {
     @Override
     public void actionPerformed(@Nullable AnActionEvent e) {
         State state = PluginPropertiesComponent.getInstance().getState();
-        if (WidgetInitComponent.getInstance() != null) {
-            WidgetInitComponent.getInstance().setStateAccordindToTime(state);
+        if (e != null) {
+            WidgetInitComponent component = e.getProject().getComponent(WidgetInitComponent.class);
+            component.setStateAccordindToTime(state);
         }
 
         if (state.isEnabled()) {

@@ -1,8 +1,8 @@
 package com.daynight.plugin.components;
 
 import com.daynight.plugin.utils.TimeUtils;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import lombok.AccessLevel;
@@ -35,7 +35,7 @@ public class PluginPropertiesComponent implements PersistentStateComponent<Plugi
 
     @NotNull
     public static PluginPropertiesComponent getInstance() {
-        return ServiceManager.getService(PluginPropertiesComponent.class);
+        return ApplicationManager.getApplication().getComponent(PluginPropertiesComponent.class);
     }
 
     @Getter

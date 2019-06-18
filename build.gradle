@@ -1,11 +1,22 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://www.jetbrains.com/intellij-repository/releases'
+        }
+        maven {
+            url 'https://www.jetbrains.com/intellij-repository/snapshots'
+        }
+    }
+}
+
 plugins {
-    id 'org.jetbrains.intellij' version '0.4.2'
+    id 'org.jetbrains.intellij' version '0.4.9'
 }
 
 apply plugin: 'java'
 
 group 'com.daynight'
-version '1.2.0'
+version '1.2.1'
 
 sourceCompatibility = 1.8
 
@@ -27,12 +38,18 @@ jar {
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://www.jetbrains.com/intellij-repository/releases'
+    }
+    maven {
+        url 'https://www.jetbrains.com/intellij-repository/snapshots'
+    }
 }
 
 patchPluginXml {
-    untilBuild '191.*'
+    untilBuild '192.*'
     changeNotes """
-      Added icon to status bar, which can be used for manual switching between themes<br>
-      Added logo<br>
-      <em>Version: 1.2.0</em>"""
+      Updated Intelij platform version to support 2019.2 versions<br>
+      Fix bug related to plugin icon duplication on Status Bar<br>
+      <em>Version: 1.2.1</em>"""
 }

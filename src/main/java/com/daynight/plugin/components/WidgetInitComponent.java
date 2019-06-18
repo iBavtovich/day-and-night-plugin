@@ -3,15 +3,14 @@ package com.daynight.plugin.components;
 import com.daynight.plugin.utils.TimeUtils;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ProjectComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
@@ -52,17 +51,14 @@ public class WidgetInitComponent implements ProjectComponent {
 
         ApplicationManager.getApplication().invokeLater(() -> {
             StatusBar statusBar = WindowManager.getInstance().getStatusBar(myProject);
+
             if (statusBar != null) {
-                statusBar.addWidget(new QuickChangeStatusBarWidget(myProject));
+                QuickChangeStatusBarWidget widget = new QuickChangeStatusBarWidget(myProject);
+                statusBar.addWidget(widget);
+                Disposer.register(myProject, () -> statusBar.removeWidget(widget.ID()));
             }
         });
-    }
 
-    public void changeIcon() {
-        StatusBar statusBar = WindowManager.getInstance().getStatusBar(myProject);
-        if (statusBar != null) {
-            statusBar.addWidget(new QuickChangeStatusBarWidget(myProject));
-        }
     }
 
     public void setStateAccordindToTime(PluginPropertiesComponent.State config) {

@@ -16,7 +16,7 @@ plugins {
 apply plugin: 'java'
 
 group 'com.daynight'
-version '1.2.1'
+version '1.2.2'
 
 sourceCompatibility = 1.8
 
@@ -47,9 +47,9 @@ repositories {
 }
 
 patchPluginXml {
-    untilBuild '192.*'
+    untilBuild '193.*'
     changeNotes """
-      Updated Intelij platform version to support 2019.2 versions<br>
-      Fix bug related to plugin icon duplication on Status Bar<br>
-      <em>Version: 1.2.1</em>"""
+      Updated Intelij platform version to support 2019.3.* versions<br>
+      Fix NPE on quick appearence change with status bar widget<br>
+      <em>Version: 1.2.2</em>"""
 }

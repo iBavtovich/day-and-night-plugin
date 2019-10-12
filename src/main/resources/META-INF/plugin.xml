@@ -31,6 +31,5 @@
 
     <actions>
         <action id="DayNightChangeColor" class="com.daynight.plugin.actions.ChangeIdeAppearanceAction" text="DayNightChangeColor"/>
-        <action id="DayAndNight.ManualSwitching" class="com.daynight.plugin.actions.QuickSwitchAction" text="ManualSwitching"/>
     </actions>
 </idea-plugin>

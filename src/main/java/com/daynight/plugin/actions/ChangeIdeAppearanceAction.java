@@ -26,7 +26,7 @@ public class ChangeIdeAppearanceAction extends AnAction {
         State state = PluginPropertiesComponent.getInstance().getState();
         if (e != null) {
             WidgetInitComponent component = e.getProject().getComponent(WidgetInitComponent.class);
-            component.setStateAccordindToTime(state);
+            component.setStateAccordingToTime(state);
         }
 
         if (state.isEnabled()) {
@@ -37,7 +37,7 @@ public class ChangeIdeAppearanceAction extends AnAction {
         }
     }
 
-    static void changeLaFIfNecessary(UIManager.LookAndFeelInfo themeForSwitch, EditorColorsScheme schemeForSwitch, State state) {
+    public static void changeLaFIfNecessary(UIManager.LookAndFeelInfo themeForSwitch, EditorColorsScheme schemeForSwitch, State state) {
         final LafManager lafManager = LafManager.getInstance();
         boolean wasDark = UIUtil.isUnderDarcula();
 

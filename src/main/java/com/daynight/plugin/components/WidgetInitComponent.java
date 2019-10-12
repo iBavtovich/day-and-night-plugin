@@ -47,7 +47,7 @@ public class WidgetInitComponent implements ProjectComponent {
     @Override
     public void projectOpened() {
         PluginPropertiesComponent.State config = PluginPropertiesComponent.getInstance().getState();
-        setStateAccordindToTime(config);
+        setStateAccordingToTime(config);
 
         ApplicationManager.getApplication().invokeLater(() -> {
             StatusBar statusBar = WindowManager.getInstance().getStatusBar(myProject);
@@ -61,7 +61,7 @@ public class WidgetInitComponent implements ProjectComponent {
 
     }
 
-    public void setStateAccordindToTime(PluginPropertiesComponent.State config) {
+    public void setStateAccordingToTime(PluginPropertiesComponent.State config) {
         state = TimeUtils.isDayNow(config) ? DAY : NIGHT;
     }
 

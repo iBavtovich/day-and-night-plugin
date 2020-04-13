@@ -1,18 +1,20 @@
 package com.daynight.plugin.utils;
 
-import com.daynight.plugin.components.PluginPropertiesComponent;
+import static com.intellij.openapi.editor.colors.EditorColorsManager.DEFAULT_SCHEME_NAME;
+
+import com.daynight.plugin.state.PluginPropsState;
 import com.intellij.ide.ui.LafManager;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.colors.impl.EditorColorsManagerImpl;
+import lombok.experimental.UtilityClass;
 
 import javax.swing.*;
 
-import static com.intellij.openapi.editor.colors.EditorColorsManager.DEFAULT_SCHEME_NAME;
-
+@UtilityClass
 public class ColorUtils {
 
-    public static EditorColorsScheme getSchemeForCurrentTime(PluginPropertiesComponent.State state) {
+    public static EditorColorsScheme getSchemeForCurrentTime(PluginPropsState state) {
         String schemeName = state.getColorSchemeNameForCurrentTime();
         return getSchemeForName(schemeName);
     }
@@ -22,7 +24,7 @@ public class ColorUtils {
         return schemeName != null ? colorsManager.getScheme(schemeName) : colorsManager.getScheme(DEFAULT_SCHEME_NAME);
     }
 
-    public static UIManager.LookAndFeelInfo getLaFForCurrentTime(PluginPropertiesComponent.State state) {
+    public static UIManager.LookAndFeelInfo getLaFForCurrentTime(PluginPropsState state) {
         String themeName = state.getThemeNameForCurrentTime();
         return getLookAndFeelInfoForName(themeName);
     }

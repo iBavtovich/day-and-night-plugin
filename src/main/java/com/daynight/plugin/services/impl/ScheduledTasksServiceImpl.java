@@ -1,42 +1,38 @@
-package com.daynight.plugin.components;
-
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.ui.playback.commands.ActionCommand;
-import com.intellij.util.concurrency.EdtExecutorService;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-
-import java.awt.event.InputEvent;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
+package com.daynight.plugin.services.impl;
 
 import static com.daynight.plugin.utils.TimeUtils.SEC_IN_DAY;
 import static com.daynight.plugin.utils.TimeUtils.getLocalTimeFromMinutes;
 import static com.daynight.plugin.utils.TimeUtils.timeFromNowToEventInSec;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class ScheduledTasksComponent {
+import com.daynight.plugin.services.PluginPropertiesStateService;
+import com.daynight.plugin.services.ScheduledTasksService;
+import com.daynight.plugin.state.PluginPropsState;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.ui.playback.commands.ActionCommand;
+import com.intellij.util.concurrency.AppExecutorUtil;
+import com.intellij.util.concurrency.EdtExecutorService;
 
-    final PluginPropertiesComponent properties;
+import java.awt.event.InputEvent;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+
+public class ScheduledTasksServiceImpl implements ScheduledTasksService {
 
     ScheduledFuture<?> switchToDayScheme;
     ScheduledFuture<?> switchToNightScheme;
 
-    private Runnable actionForSchemeSwitching = () -> {
-        AnAction action = ActionManager.getInstance().getAction("DayNightChangeColor");
-        InputEvent inputEvent = ActionCommand.getInputEvent("RightClickButton");
-
-        ActionManager.getInstance().tryToExecute(action, inputEvent, null, null, true);
+    private final Runnable actionForSchemeSwitching = () -> {
+        ActionManager actionManager = ActionManager.getInstance();
+        AnAction action = actionManager.getAction("DayNightChangeColor");
+        action.actionPerformed(null);
     };
 
+    @Override
     public void submitTasksIfNeeded() {
-        ScheduledExecutorService service = EdtExecutorService.getScheduledExecutorInstance();
-        PluginPropertiesComponent.State state = properties.getState();
-
+        ScheduledExecutorService service = AppExecutorUtil.getAppScheduledExecutorService();
+        PluginPropsState state = PluginPropertiesStateService.getInstance().getState();
         if (state.isEnabled()) {
             switchToDayScheme = service.scheduleWithFixedDelay(actionForSchemeSwitching,
                     timeFromNowToEventInSec(getLocalTimeFromMinutes(state.getDayStartTime())), SEC_IN_DAY, SECONDS);
@@ -46,6 +42,7 @@ public class ScheduledTasksComponent {
         }
     }
 
+    @Override
     public void cancelTasksIfExists() {
         if (switchToDayScheme != null) {
             switchToDayScheme.cancel(true);
@@ -54,5 +51,4 @@ public class ScheduledTasksComponent {
             switchToNightScheme.cancel(true);
         }
     }
-
 }

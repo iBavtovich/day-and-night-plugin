@@ -1,8 +1,13 @@
 package com.daynight.plugin.forms;
 
-import com.daynight.plugin.components.PluginPropertiesComponent;
+import static com.daynight.plugin.utils.TimeUtils.getLocalTimeFromMinutes;
+import static com.daynight.plugin.utils.TimeUtils.getTimeInMinutes;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 import com.daynight.plugin.forms.ui.ColorSchemeComboBox;
 import com.daynight.plugin.forms.ui.ThemeComboBox;
+import com.daynight.plugin.services.PluginPropertiesStateService;
+import com.daynight.plugin.state.PluginPropsState;
 import com.github.lgooddatepicker.components.TimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.intellij.ide.ui.LafManager;
@@ -16,14 +21,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.time.LocalTime;
 
-import static com.daynight.plugin.utils.TimeUtils.getLocalTimeFromMinutes;
-import static com.daynight.plugin.utils.TimeUtils.getTimeInMinutes;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import javax.swing.*;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -40,14 +42,14 @@ public class DayNightConfigurableGUI {
     ColorSchemeComboBox daySchemePicker;
     ColorSchemeComboBox nightSchemePicker;
 
-    PluginPropertiesComponent config;
+    PluginPropertiesStateService configService;
 
     private void createUIComponents() {
         EditorColorsManagerImpl editorColorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
         LafManager lafManager = LafManager.getInstance();
 
-        config = PluginPropertiesComponent.getInstance();
-        PluginPropertiesComponent.State state = config.getState();
+        configService = PluginPropertiesStateService.getInstance();
+        PluginPropsState state = configService.getState();
         fillSettingsWithDefaultsIfNeeded(state);
 
         dayThemePicker = new ThemeComboBox(lafManager.getInstalledLookAndFeels());
@@ -68,25 +70,17 @@ public class DayNightConfigurableGUI {
         disableSchemePickCheckbox = new JCheckBox();
         disableSchemePickCheckbox.setSelected(!state.isSchemePickEnabled());
         disableSchemePickCheckbox.addItemListener(l -> {
-            if (l.getStateChange() == ItemEvent.SELECTED) {
-                setSchemePickersPanelEnabled(false);
-            } else {
-                setSchemePickersPanelEnabled(true);
-            }
+            setSchemePickersPanelEnabled(l.getStateChange() != ItemEvent.SELECTED);
         });
 
         enablePluginCheckbox = new JCheckBox();
         enablePluginCheckbox.setSelected(state.isEnabled());
         enablePluginCheckbox.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                setAllSettingComponentsEnabled(true);
-            } else {
-                setAllSettingComponentsEnabled(false);
-            }
+            setAllSettingComponentsEnabled(e.getStateChange() == ItemEvent.SELECTED);
         });
     }
 
-    private void fillSettingsWithDefaultsIfNeeded(PluginPropertiesComponent.State state) {
+    private void fillSettingsWithDefaultsIfNeeded(PluginPropsState state) {
         EditorColorsManagerImpl editorColorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
         LafManager lafManager = LafManager.getInstance();
 
@@ -135,7 +129,7 @@ public class DayNightConfigurableGUI {
 
     public boolean isModified() {
         boolean changed = false;
-        PluginPropertiesComponent.State state = config.getState();
+        PluginPropsState state = configService.getState();
         boolean enablePlugin = enablePluginCheckbox.isSelected();
 
         if (enablePlugin != state.isEnabled()) {
@@ -158,7 +152,7 @@ public class DayNightConfigurableGUI {
     }
 
     public void applyChanges() throws ConfigurationException {
-        PluginPropertiesComponent.State state = config.getState();
+        PluginPropsState state = configService.getState();
 
         state.setEnabled(enablePluginCheckbox.isSelected());
         state.setDayThemeName(dayThemePicker.getSelectedThemeName());
@@ -176,11 +170,11 @@ public class DayNightConfigurableGUI {
         state.setDaySchemeName(daySchemePicker.getSelectedSchemeName());
         state.setNightSchemeName(nightSchemePicker.getSelectedSchemeName());
 
-        config.loadState(state);
+        configService.loadState(state);
     }
 
     public void resetChanges() {
-        PluginPropertiesComponent.State state = config.getState();
+        PluginPropsState state = configService.getState();
 
         enablePluginCheckbox.setSelected(state.isEnabled());
         dayThemePicker.setSelectedTheme(getThemeByName(state.getDayThemeName()));

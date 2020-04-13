@@ -1,6 +1,6 @@
 package com.daynight.plugin.utils;
 
-import com.daynight.plugin.components.PluginPropertiesComponent;
+import com.daynight.plugin.state.PluginPropsState;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalTime;
@@ -10,7 +10,7 @@ public class TimeUtils {
 
     public static final int SEC_IN_DAY = 24 * 60 * 60;
 
-    public static boolean isDayNow(PluginPropertiesComponent.State state) {
+    public static boolean isDayNow(PluginPropsState state) {
         int timeInMinutes = getTimeInMinutes(LocalTime.now());
         if (state.getNightStartTime() < state.getDayStartTime()) {
             return !(timeInMinutes >= state.getNightStartTime() && timeInMinutes < state.getDayStartTime());
@@ -19,7 +19,7 @@ public class TimeUtils {
         }
     }
 
-    public static boolean isNightNow(PluginPropertiesComponent.State state) {
+    public static boolean isNightNow(PluginPropsState state) {
         return !isDayNow(state);
     }
 

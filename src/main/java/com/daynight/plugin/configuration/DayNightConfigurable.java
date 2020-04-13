@@ -1,8 +1,9 @@
 package com.daynight.plugin.configuration;
 
-import com.daynight.plugin.components.PluginPropertiesComponent;
-import com.daynight.plugin.components.ScheduledTasksComponent;
 import com.daynight.plugin.forms.DayNightConfigurableGUI;
+import com.daynight.plugin.services.PluginPropertiesStateService;
+import com.daynight.plugin.services.ScheduledTasksService;
+import com.daynight.plugin.state.PluginPropsState;
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
@@ -23,13 +24,12 @@ import javax.swing.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DayNightConfigurable implements SearchableConfigurable {
 
-    final PluginPropertiesComponent propertiesComponent;
-    final ScheduledTasksComponent tasksComponent;
+    final PluginPropertiesStateService propertiesStateService = PluginPropertiesStateService.getInstance();
+    final ScheduledTasksService tasksService = ScheduledTasksService.getInstance();
 
     DayNightConfigurableGUI configGUI;
 
     @NotNull
-    @Override
     public String getId() {
         return "preference.DayNightConfigurable";
     }
@@ -44,8 +44,8 @@ public class DayNightConfigurable implements SearchableConfigurable {
     @Override
     public JComponent createComponent() {
         configGUI = new DayNightConfigurableGUI();
-        configGUI.setAllSettingComponentsEnabled(propertiesComponent.getState().isEnabled());
-        configGUI.setSchemePickersPanelEnabled(propertiesComponent.getState().isSchemePickEnabled());
+        configGUI.setAllSettingComponentsEnabled(propertiesStateService.getState().isEnabled());
+        configGUI.setSchemePickersPanelEnabled(propertiesStateService.getState().isSchemePickEnabled());
         return configGUI.getRootPanel();
     }
 
@@ -62,11 +62,11 @@ public class DayNightConfigurable implements SearchableConfigurable {
     @Override
     public void apply() throws ConfigurationException {
         configGUI.applyChanges();
-        PluginPropertiesComponent.State state = propertiesComponent.getState();
+        PluginPropsState state = propertiesStateService.getState();
 
-        tasksComponent.cancelTasksIfExists();
+        tasksService.cancelTasksIfExists();
         if (state.isEnabled()) {
-            tasksComponent.submitTasksIfNeeded();
+            tasksService.submitTasksIfNeeded();
             DataContext dataContext = DataManager.getInstance().getDataContext(configGUI.getRootPanel());
             AnActionEvent event = AnActionEvent.createFromDataContext(ActionPlaces.UNKNOWN, null, dataContext);
             ActionManager.getInstance().getAction("DayNightChangeColor").actionPerformed(event);

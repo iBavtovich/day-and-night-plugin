@@ -16,12 +16,12 @@ plugins {
 apply plugin: 'java'
 
 group 'com.daynight'
-version '1.2.2'
+version '1.2.3'
 
 sourceCompatibility = 1.8
 
 intellij {
-    version '2019.1'
+    version '2020.1'
 }
 
 dependencies {
@@ -47,9 +47,9 @@ repositories {
 }
 
 patchPluginXml {
-    untilBuild '193.*'
+    untilBuild '204.*'
     changeNotes """
-      Updated Intelij platform version to support 2019.3.* versions<br>
-      Fix NPE on quick appearence change with status bar widget<br>
-      <em>Version: 1.2.2</em>"""
+      Updated Intelij platform version to support 2020.* versions<br>
+      Removed usage of deprecated API. <br>
+      <em>Version: 1.2.3</em>"""
 }

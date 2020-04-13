@@ -1,6 +1,14 @@
 package com.daynight.plugin.components;
 
+import static com.daynight.plugin.services.StatusBatWidgetInitService.WidgetState.DAY;
+import static com.daynight.plugin.services.StatusBatWidgetInitService.WidgetState.NIGHT;
+import static com.daynight.plugin.utils.ColorUtils.getLookAndFeelInfoForName;
+import static com.daynight.plugin.utils.ColorUtils.getSchemeForName;
+
 import com.daynight.plugin.actions.ChangeIdeAppearanceAction;
+import com.daynight.plugin.services.PluginPropertiesStateService;
+import com.daynight.plugin.services.StatusBatWidgetInitService;
+import com.daynight.plugin.state.PluginPropsState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.StatusBar;
@@ -9,13 +17,9 @@ import com.intellij.util.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
 import java.awt.event.MouseEvent;
 
-import static com.daynight.plugin.components.WidgetInitComponent.WidgetState.DAY;
-import static com.daynight.plugin.components.WidgetInitComponent.WidgetState.NIGHT;
-import static com.daynight.plugin.utils.ColorUtils.getLookAndFeelInfoForName;
-import static com.daynight.plugin.utils.ColorUtils.getSchemeForName;
+import javax.swing.*;
 
 public class QuickChangeStatusBarWidget implements StatusBarWidget.Multiframe, StatusBarWidget.IconPresentation {
 
@@ -35,7 +39,7 @@ public class QuickChangeStatusBarWidget implements StatusBarWidget.Multiframe, S
 
     @Nullable
     @Override
-    public WidgetPresentation getPresentation(@NotNull PlatformType type) {
+    public WidgetPresentation getPresentation() {
         return this;
     }
 
@@ -75,8 +79,8 @@ public class QuickChangeStatusBarWidget implements StatusBarWidget.Multiframe, S
 
         @Override
         public void consume(MouseEvent mouseEvent) {
-            PluginPropertiesComponent.State state = PluginPropertiesComponent.getInstance().getState();
-            WidgetInitComponent widget = myProject.getComponent(WidgetInitComponent.class);
+            PluginPropsState state = PluginPropertiesStateService.getInstance().getState();
+            StatusBatWidgetInitService widget = StatusBatWidgetInitService.getInstance(myProject);
 
             String themeForUpdate = null;
             String schemeForUpdate = null;
@@ -85,13 +89,13 @@ public class QuickChangeStatusBarWidget implements StatusBarWidget.Multiframe, S
                 case DAY:
                     schemeForUpdate = state.getNightSchemeName();
                     themeForUpdate = state.getNightThemeName();
-                    widget.setState(NIGHT);
+                    widget.updateState(NIGHT);
                     break;
 
                 case NIGHT:
                     schemeForUpdate = state.getDaySchemeName();
                     themeForUpdate = state.getDayThemeName();
-                    widget.setState(DAY);
+                    widget.updateState(DAY);
                     break;
             }
 

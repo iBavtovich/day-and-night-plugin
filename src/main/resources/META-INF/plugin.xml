@@ -6,27 +6,27 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <application-components>
-        <component>
-            <implementation-class>com.daynight.plugin.components.PluginPropertiesComponent</implementation-class>
-        </component>
-        <component>
-            <implementation-class>com.daynight.plugin.components.ChangeSchemeOnStartUpComponent</implementation-class>
-        </component>
-        <component>
-            <implementation-class>com.daynight.plugin.components.ScheduledTasksComponent</implementation-class>
-        </component>
-    </application-components>
 
-    <project-components>
-        <component>
-            <implementation-class>com.daynight.plugin.components.WidgetInitComponent</implementation-class>
-        </component>
-    </project-components>
-
+    <applicationListeners>
+        <listener class="com.daynight.plugin.listeners.StartUpInitializer" topic="com.intellij.ide.AppLifecycleListener"/>
+    </applicationListeners>
     <extensions defaultExtensionNs="com.intellij">
-        <applicationConfigurable groupId="other" displayName="Day and Night" id="preference.DayNightConfigurable"
-                                 instance="com.daynight.plugin.configuration.DayNightConfigurable" />
+
+        <applicationConfigurable displayName="Day and Night" id="dayNightConfigurable"
+                                 instance="com.daynight.plugin.configuration.DayNightConfigurable" dynamic="true" />
+
+        <statusBarWidgetFactory  id="quickChangeWidget"
+                                 implementation="com.daynight.plugin.components.QuickChangeStatusBarWidgetFactory"
+                                 order="last"/>
+
+        <projectService serviceInterface="com.daynight.plugin.services.StatusBatWidgetInitService"
+                        serviceImplementation="com.daynight.plugin.services.impl.StatusBatWidgetInitServiceImpl" />
+
+        <applicationService serviceInterface="com.daynight.plugin.services.PluginPropertiesStateService"
+                            serviceImplementation="com.daynight.plugin.services.impl.PluginPropertiesStateServiceImpl"/>
+        <applicationService serviceInterface="com.daynight.plugin.services.ScheduledTasksService"
+                            serviceImplementation="com.daynight.plugin.services.impl.ScheduledTasksServiceImpl"/>
+        <preloadingActivity implementation="com.daynight.plugin.listeners.StartUpInitializer"/>
     </extensions>
 
     <actions>

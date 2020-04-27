@@ -42,10 +42,11 @@ public class ChangeIdeAppearanceAction extends AnAction {
                                             PluginPropsState state) {
         final LafManager lafManager = LafManager.getInstance();
         QuickChangeLookAndFeel.switchLafAndUpdateUI(lafManager, themeForSwitch, true);
+        EditorColorsManager editorColorsManager = EditorColorsManager.getInstance();
         if (state.isSchemePickEnabled()) {
-            SwingUtilities.invokeLater(() -> EditorColorsManager.getInstance().setGlobalScheme(schemeForSwitch));
+            SwingUtilities.invokeLater(() -> editorColorsManager.setGlobalScheme(schemeForSwitch));
         } else /* Set default for chosen theme */ {
-            SwingUtilities.invokeLater(() -> EditorColorsManager.getInstance().setGlobalScheme(EditorColorsManager.getInstance().getSchemeForCurrentUITheme()));
+            SwingUtilities.invokeLater(() -> editorColorsManager.setGlobalScheme(editorColorsManager.getSchemeForCurrentUITheme()));
         }
     }
 }

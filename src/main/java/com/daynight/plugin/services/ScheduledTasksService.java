@@ -9,5 +9,5 @@ public interface ScheduledTasksService {
 
     void submitTasksIfNeeded();
 
-    void cancelTasksIfExists();
+    void cancelTask();
 }

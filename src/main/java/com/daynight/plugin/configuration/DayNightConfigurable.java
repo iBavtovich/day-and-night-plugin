@@ -64,7 +64,7 @@ public class DayNightConfigurable implements SearchableConfigurable {
         configGUI.applyChanges();
         PluginPropsState state = propertiesStateService.getState();
 
-        tasksService.cancelTasksIfExists();
+        tasksService.cancelTask();
         if (state.isEnabled()) {
             tasksService.submitTasksIfNeeded();
             DataContext dataContext = DataManager.getInstance().getDataContext(configGUI.getRootPanel());

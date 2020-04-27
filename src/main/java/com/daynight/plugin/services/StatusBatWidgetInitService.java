@@ -10,7 +10,6 @@ public interface StatusBatWidgetInitService {
         return ServiceManager.getService(project, StatusBatWidgetInitService.class);
     }
 
-
     WidgetState getState();
 
     void updateState(WidgetState newState);

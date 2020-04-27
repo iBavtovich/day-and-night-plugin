@@ -16,7 +16,7 @@ plugins {
 apply plugin: 'java'
 
 group 'com.daynight'
-version '1.2.3'
+version '1.2.4'
 
 sourceCompatibility = 1.8
 
@@ -47,9 +47,10 @@ repositories {
 }
 
 patchPluginXml {
-    untilBuild '204.*'
+    sinceBuild '200.*'
+//    untilBuild '*'
     changeNotes """
-      Updated Intelij platform version to support 2020.* versions<br>
-      Removed usage of deprecated API. <br>
-      <em>Version: 1.2.3</em>"""
+      Fix issue with switching after hibernation<br>
+      Fix exception on startup<br>
+      <em>Version: 1.2.4</em>"""
 }

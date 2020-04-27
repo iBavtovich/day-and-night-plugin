@@ -5,7 +5,6 @@ import com.intellij.ide.AppLifecycleListener;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -14,15 +13,14 @@ public class StartUpInitializer implements AppLifecycleListener {
 
     @Override
     public void appFrameCreated(@NotNull List<String> commandLineArgs) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            ScheduledTasksService scheduledTasksService = ScheduledTasksService.getInstance();
-            scheduledTasksService.submitTasksIfNeeded();
-            changeLookAndFeelIfNeeded();
-        });
+        ScheduledTasksService scheduledTasksService = ScheduledTasksService.getInstance();
+        scheduledTasksService.submitTasksIfNeeded();
+        changeLokAndFeel();
     }
 
-    private void changeLookAndFeelIfNeeded() {
-        AnAction dayNightChangeLaF = ActionManager.getInstance().getAction("DayNightChangeColor");
-        dayNightChangeLaF.actionPerformed(null);
+    private void changeLokAndFeel() {
+        ActionManager instance = ActionManager.getInstance();
+        AnAction action = instance.getAction("DayNightChangeColor");
+        ApplicationManager.getApplication().invokeLater(() -> action.actionPerformed(null));
     }
 }

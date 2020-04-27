@@ -26,7 +26,6 @@
                             serviceImplementation="com.daynight.plugin.services.impl.PluginPropertiesStateServiceImpl"/>
         <applicationService serviceInterface="com.daynight.plugin.services.ScheduledTasksService"
                             serviceImplementation="com.daynight.plugin.services.impl.ScheduledTasksServiceImpl"/>
-        <preloadingActivity implementation="com.daynight.plugin.listeners.StartUpInitializer"/>
     </extensions>
 
     <actions>

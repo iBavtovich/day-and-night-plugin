@@ -23,7 +23,7 @@ public class ChangeIdeAppearanceAction extends AnAction {
     public void actionPerformed(@Nullable AnActionEvent e) {
         ApplicationManager.getApplication().invokeLater(() -> {
             PluginPropsState state = PluginPropertiesStateService.getInstance().getState();
-            if (e != null) {
+            if (e != null && e.getProject() != null) {
                 StatusBatWidgetInitService widgetInitService = StatusBatWidgetInitService.getInstance(e.getProject());
                 widgetInitService.updateStateAccordingToState(state);
             }

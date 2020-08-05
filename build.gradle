@@ -16,7 +16,7 @@ plugins {
 apply plugin: 'java'
 
 group 'com.daynight'
-version '1.2.4'
+version '1.2.5'
 
 sourceCompatibility = 1.8
 
@@ -48,9 +48,8 @@ repositories {
 
 patchPluginXml {
     sinceBuild '200.*'
-//    untilBuild '*'
+    untilBuild null
     changeNotes """
-      Fix issue with switching after hibernation<br>
-      Fix exception on startup<br>
-      <em>Version: 1.2.4</em>"""
+      Fix until build: keep until version open<br>
+      <em>Version: 1.2.5</em>"""
 }

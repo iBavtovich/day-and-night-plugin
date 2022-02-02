@@ -24,6 +24,7 @@ import lombok.experimental.FieldDefaults;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.time.LocalTime;
+import java.util.Objects;
 
 import javax.swing.*;
 
@@ -69,15 +70,13 @@ public class DayNightConfigurableGUI {
 
         disableSchemePickCheckbox = new JCheckBox();
         disableSchemePickCheckbox.setSelected(!state.isSchemePickEnabled());
-        disableSchemePickCheckbox.addItemListener(l -> {
-            setSchemePickersPanelEnabled(l.getStateChange() != ItemEvent.SELECTED);
-        });
+        disableSchemePickCheckbox.addItemListener(l ->
+                setSchemePickersPanelEnabled(l.getStateChange() != ItemEvent.SELECTED));
 
         enablePluginCheckbox = new JCheckBox();
         enablePluginCheckbox.setSelected(state.isEnabled());
-        enablePluginCheckbox.addItemListener(e -> {
-            setAllSettingComponentsEnabled(e.getStateChange() == ItemEvent.SELECTED);
-        });
+        enablePluginCheckbox.addItemListener(e ->
+                setAllSettingComponentsEnabled(e.getStateChange() == ItemEvent.SELECTED));
     }
 
     private void fillSettingsWithDefaultsIfNeeded(PluginPropsState state) {
@@ -135,8 +134,8 @@ public class DayNightConfigurableGUI {
         if (enablePlugin != state.isEnabled()) {
             changed = true;
         } else {
-            changed |= !(state.getDayThemeName()).equalsIgnoreCase(dayThemePicker.getSelectedThemeName());
-            changed |= !(state.getNightThemeName()).equalsIgnoreCase(nightThemePicker.getSelectedThemeName());
+            changed |= !Objects.equals(state.getDayThemeName(), dayThemePicker.getSelectedThemeName());
+            changed |= !Objects.equals(state.getNightThemeName(), nightThemePicker.getSelectedThemeName());
 
             changed |= (getTimeInMinutes(dayTimePicker.getTime()) != state.getDayStartTime());
             changed |= (getTimeInMinutes(nightTimePicker.getTime()) != state.getNightStartTime());
@@ -144,8 +143,8 @@ public class DayNightConfigurableGUI {
             changed |= state.isSchemePickEnabled() == disableSchemePickCheckbox.isSelected();
 
             if (!disableSchemePickCheckbox.isSelected()) {
-                changed |= !daySchemePicker.getSelectedSchemeName().equalsIgnoreCase(state.getDaySchemeName());
-                changed |= !nightSchemePicker.getSelectedSchemeName().equalsIgnoreCase(state.getNightSchemeName());
+                changed |= !Objects.equals(daySchemePicker.getSelectedSchemeName(), state.getDaySchemeName());
+                changed |= !Objects.equals(nightSchemePicker.getSelectedSchemeName(), state.getNightSchemeName());
             }
         }
         return changed;

@@ -14,8 +14,11 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import javax.swing.*;
+
+import static java.util.Objects.nonNull;
 
 public class ChangeIdeAppearanceAction extends AnAction {
 
@@ -37,16 +40,19 @@ public class ChangeIdeAppearanceAction extends AnAction {
         });
     }
 
-    public static void changeLaFIfNecessary(UIManager.LookAndFeelInfo themeForSwitch,
-                                            EditorColorsScheme schemeForSwitch,
-                                            PluginPropsState state) {
-        final LafManager lafManager = LafManager.getInstance();
-        QuickChangeLookAndFeel.switchLafAndUpdateUI(lafManager, themeForSwitch, true);
+    public static void changeLaFIfNecessary(@Nullable UIManager.LookAndFeelInfo themeForSwitch,
+            @Nullable EditorColorsScheme schemeForSwitch, PluginPropsState state) {
+        if (nonNull(themeForSwitch)) {
+            final LafManager lafManager = LafManager.getInstance();
+            QuickChangeLookAndFeel.switchLafAndUpdateUI(lafManager, themeForSwitch, true);
+        }
+
         EditorColorsManager editorColorsManager = EditorColorsManager.getInstance();
-        if (state.isSchemePickEnabled()) {
+        if (state.isSchemePickEnabled() && nonNull(schemeForSwitch)) {
             SwingUtilities.invokeLater(() -> editorColorsManager.setGlobalScheme(schemeForSwitch));
         } else /* Set default for chosen theme */ {
-            SwingUtilities.invokeLater(() -> editorColorsManager.setGlobalScheme(editorColorsManager.getSchemeForCurrentUITheme()));
+            SwingUtilities.invokeLater(
+                    () -> editorColorsManager.setGlobalScheme(editorColorsManager.getSchemeForCurrentUITheme()));
         }
     }
 }

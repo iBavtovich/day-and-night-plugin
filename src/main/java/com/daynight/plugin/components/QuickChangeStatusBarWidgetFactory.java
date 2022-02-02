@@ -10,9 +10,8 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
 public class QuickChangeStatusBarWidgetFactory implements StatusBarWidgetFactory {
-
-    public static final String DISPLAY_NAME = "Change IDE appearance";
-    public static final String WIDGET_ID = "QuickChange";
+    private static final String DISPLAY_NAME = "Change IDE appearance";
+    private static final String WIDGET_ID = "QuickChange";
 
     @NotNull
     @Override

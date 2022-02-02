@@ -9,18 +9,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class StartUpInitializer implements AppLifecycleListener {
+/**
+ * Initializer to schedule task for switching theme/scheme for the next period.
+ */
+public class SubmitTasksOnStartUpListener implements AppLifecycleListener {
 
     @Override
     public void appFrameCreated(@NotNull List<String> commandLineArgs) {
         ScheduledTasksService scheduledTasksService = ScheduledTasksService.getInstance();
         scheduledTasksService.submitTasksIfNeeded();
-        changeLokAndFeel();
-    }
-
-    private void changeLokAndFeel() {
-        ActionManager instance = ActionManager.getInstance();
-        AnAction action = instance.getAction("DayNightChangeColor");
-        ApplicationManager.getApplication().invokeLater(() -> action.actionPerformed(null));
     }
 }

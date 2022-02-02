@@ -23,8 +23,8 @@ import javax.swing.*;
 
 public class QuickChangeStatusBarWidget implements StatusBarWidget.Multiframe, StatusBarWidget.IconPresentation {
 
+    private final Consumer<MouseEvent> clickConsumer;
     private Project myProject;
-    private Consumer<MouseEvent> clickConsumer;
 
     public QuickChangeStatusBarWidget(@NotNull Project project) {
         myProject = project;

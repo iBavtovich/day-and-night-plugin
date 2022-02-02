@@ -1,16 +1,19 @@
 package com.daynight.plugin.forms.ui;
 
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.ui.SimpleListCellRenderer;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class ThemeComboBox extends ComboBox<UIManager.LookAndFeelInfo> {
+import static java.util.Objects.isNull;
 
-    private final static SimpleListCellRenderer DEFAULT_RENDERER = new SimpleListCellRenderer<UIManager.LookAndFeelInfo>() {
+public class ThemeComboBox extends ComboBox<UIManager.LookAndFeelInfo> {
+    private static final SimpleListCellRenderer<UIManager.LookAndFeelInfo> DEFAULT_RENDERER = new SimpleListCellRenderer<UIManager.LookAndFeelInfo>() {
         @Override
-        public void customize(JList list, UIManager.LookAndFeelInfo value, int index, boolean selected, boolean hasFocus) {
+        public void customize(@NotNull JList list, UIManager.LookAndFeelInfo value, int index, boolean selected, boolean hasFocus) {
             setText(value.getName());
         }
     };
@@ -28,7 +31,9 @@ public class ThemeComboBox extends ComboBox<UIManager.LookAndFeelInfo> {
         setSelectedItem(theme);
     }
 
+    @Nullable
     public String getSelectedThemeName() {
-        return getSelectedTheme().getName();
+        UIManager.LookAndFeelInfo selectedTheme = getSelectedTheme();
+        return isNull(selectedTheme) ? null : selectedTheme.getName();
     }
 }

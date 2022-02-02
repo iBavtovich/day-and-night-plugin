@@ -1,10 +1,10 @@
 package com.daynight.plugin.services;
 
-import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.application.ApplicationManager;
 
 public interface ScheduledTasksService {
     static ScheduledTasksService getInstance() {
-        return ServiceManager.getService(ScheduledTasksService.class);
+        return ApplicationManager.getApplication().getService(ScheduledTasksService.class);
     }
 
     void submitTasksIfNeeded();

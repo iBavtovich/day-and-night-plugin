@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PluginPropertiesStateServiceImpl implements PluginPropertiesStateService {
 
-    PluginPropsState myState = new PluginPropsState();
+    private PluginPropsState myState = new PluginPropsState();
 
     @Override
     @NotNull
@@ -35,5 +35,4 @@ public class PluginPropertiesStateServiceImpl implements PluginPropertiesStateSe
     public static PluginPropertiesStateService getInstance() {
         return ApplicationManager.getApplication().getComponent(PluginPropertiesStateService.class);
     }
-
 }

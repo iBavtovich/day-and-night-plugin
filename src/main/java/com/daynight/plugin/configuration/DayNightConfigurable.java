@@ -24,8 +24,8 @@ import javax.swing.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DayNightConfigurable implements SearchableConfigurable {
 
-    final PluginPropertiesStateService propertiesStateService = PluginPropertiesStateService.getInstance();
-    final ScheduledTasksService tasksService = ScheduledTasksService.getInstance();
+    private final PluginPropertiesStateService propertiesStateService = PluginPropertiesStateService.getInstance();
+    private final ScheduledTasksService tasksService = ScheduledTasksService.getInstance();
 
     DayNightConfigurableGUI configGUI;
 

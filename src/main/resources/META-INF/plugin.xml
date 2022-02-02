@@ -8,7 +8,7 @@
 
 
     <applicationListeners>
-        <listener class="com.daynight.plugin.listeners.StartUpInitializer" topic="com.intellij.ide.AppLifecycleListener"/>
+        <listener class="com.daynight.plugin.listeners.SubmitTasksOnStartUpListener" topic="com.intellij.ide.AppLifecycleListener"/>
     </applicationListeners>
     <extensions defaultExtensionNs="com.intellij">
 
@@ -26,7 +26,8 @@
                             serviceImplementation="com.daynight.plugin.services.impl.PluginPropertiesStateServiceImpl"/>
         <applicationService serviceInterface="com.daynight.plugin.services.ScheduledTasksService"
                             serviceImplementation="com.daynight.plugin.services.impl.ScheduledTasksServiceImpl"/>
-    </extensions>
+		<actionConfigurationCustomizer implementation="com.daynight.plugin.listeners.ChangeLafOnStartUpCustomizer"/>
+	</extensions>
 
     <actions>
         <action id="DayNightChangeColor" class="com.daynight.plugin.actions.ChangeIdeAppearanceAction" text="DayNightChangeColor"/>

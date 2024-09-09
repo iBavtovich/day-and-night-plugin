@@ -1,8 +1,5 @@
 package com.daynight.plugin.services.impl;
 
-import static com.daynight.plugin.utils.TimeUtils.getLocalTimeFromMinutes;
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import com.daynight.plugin.services.PluginPropertiesStateService;
 import com.daynight.plugin.services.ScheduledTasksService;
 import com.daynight.plugin.state.PluginPropsState;
@@ -11,9 +8,6 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.util.concurrency.AppExecutorUtil;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +16,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+import static com.daynight.plugin.utils.TimeUtils.getLocalTimeFromMinutes;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class ScheduledTasksServiceImpl implements ScheduledTasksService {
     private ScheduledFuture<?> switchingFuture;
@@ -63,6 +65,11 @@ public class ScheduledTasksServiceImpl implements ScheduledTasksService {
                 action.actionPerformed(AnActionEvent.createFromAnAction(action, null, "", dataContext))
             );
         }
+    }
+
+    @Override
+    public void dispose() {
+        cancelTask();
     }
 
     @Getter

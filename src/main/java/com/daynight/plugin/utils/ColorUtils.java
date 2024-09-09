@@ -1,15 +1,14 @@
 package com.daynight.plugin.utils;
 
-import static com.intellij.openapi.editor.colors.EditorColorsManager.DEFAULT_SCHEME_NAME;
-
 import com.daynight.plugin.state.PluginPropsState;
 import com.intellij.ide.ui.LafManager;
+import com.intellij.ide.ui.laf.UIThemeLookAndFeelInfo;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
-import com.intellij.openapi.editor.colors.impl.EditorColorsManagerImpl;
-import lombok.experimental.UtilityClass;
 
-import javax.swing.*;
+import java.util.Iterator;
+
+import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class ColorUtils {
@@ -20,25 +19,26 @@ public class ColorUtils {
     }
 
     public static EditorColorsScheme getSchemeForName(String schemeName) {
-        EditorColorsManagerImpl colorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
-        return schemeName != null ? colorsManager.getScheme(schemeName) : colorsManager.getScheme(DEFAULT_SCHEME_NAME);
+        EditorColorsManager colorsManager = EditorColorsManager.getInstance();
+        return schemeName != null ? colorsManager.getScheme(schemeName)
+                : colorsManager.getScheme(EditorColorsManager.getDefaultSchemeName());
     }
 
-    public static UIManager.LookAndFeelInfo getLaFForCurrentTime(PluginPropsState state) {
+    public static UIThemeLookAndFeelInfo getLaFForCurrentTime(PluginPropsState state) {
         String themeName = state.getThemeNameForCurrentTime();
-        return getLookAndFeelInfoForName(themeName);
+        return getThemeByName(themeName);
     }
 
-    public static UIManager.LookAndFeelInfo getLookAndFeelInfoForName(String themeName) {
+    public static UIThemeLookAndFeelInfo getThemeByName(String themeName) {
         LafManager lafManager = LafManager.getInstance();
-        UIManager.LookAndFeelInfo[] installedLookAndFeels = lafManager.getInstalledLookAndFeels();
 
-        for (UIManager.LookAndFeelInfo lookAndFeel : installedLookAndFeels) {
-            if (lookAndFeel.getName().equals(themeName)) {
+        Iterator<UIThemeLookAndFeelInfo> installedThemesIterator = lafManager.getInstalledThemes().iterator();
+        while (installedThemesIterator.hasNext()) {
+            UIThemeLookAndFeelInfo lookAndFeel = installedThemesIterator.next();
+            if (lookAndFeel.getName().equalsIgnoreCase(themeName)) {
                 return lookAndFeel;
             }
         }
-
-        return lafManager.getCurrentLookAndFeel();
+        return lafManager.getCurrentUIThemeLookAndFeel();
     }
 }

@@ -1,26 +1,29 @@
 package com.daynight.plugin.actions;
 
-import static com.daynight.plugin.utils.ColorUtils.getLaFForCurrentTime;
-import static com.daynight.plugin.utils.ColorUtils.getSchemeForCurrentTime;
-
 import com.daynight.plugin.services.PluginPropertiesStateService;
 import com.daynight.plugin.services.StatusBatWidgetInitService;
 import com.daynight.plugin.state.PluginPropsState;
 import com.intellij.ide.actions.QuickChangeLookAndFeel;
 import com.intellij.ide.ui.LafManager;
+import com.intellij.ide.ui.laf.UIThemeLookAndFeelInfo;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
+
+import static com.daynight.plugin.utils.ColorUtils.getLaFForCurrentTime;
+import static com.daynight.plugin.utils.ColorUtils.getSchemeForCurrentTime;
 
 import static java.util.Objects.nonNull;
 
-public class ChangeIdeAppearanceAction extends AnAction {
+@Service
+public final class ChangeIdeAppearanceAction extends AnAction {
 
     @Override
     public void actionPerformed(@Nullable AnActionEvent e) {
@@ -32,15 +35,16 @@ public class ChangeIdeAppearanceAction extends AnAction {
             }
 
             if (state.isEnabled()) {
+
                 EditorColorsScheme schemeForSwitch = getSchemeForCurrentTime(state);
-                UIManager.LookAndFeelInfo themeForSwitch = getLaFForCurrentTime(state);
+                UIThemeLookAndFeelInfo themeForSwitch = getLaFForCurrentTime(state);
 
                 changeLaFIfNecessary(themeForSwitch, schemeForSwitch, state);
             }
         });
     }
 
-    public static void changeLaFIfNecessary(@Nullable UIManager.LookAndFeelInfo themeForSwitch,
+    public static void changeLaFIfNecessary(@Nullable UIThemeLookAndFeelInfo themeForSwitch,
             @Nullable EditorColorsScheme schemeForSwitch, PluginPropsState state) {
         if (nonNull(themeForSwitch)) {
             final LafManager lafManager = LafManager.getInstance();

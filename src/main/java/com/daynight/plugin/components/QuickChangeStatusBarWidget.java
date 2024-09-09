@@ -1,78 +1,65 @@
 package com.daynight.plugin.components;
 
-import static com.daynight.plugin.services.StatusBatWidgetInitService.WidgetState.DAY;
-import static com.daynight.plugin.services.StatusBatWidgetInitService.WidgetState.NIGHT;
-import static com.daynight.plugin.utils.ColorUtils.getLookAndFeelInfoForName;
-import static com.daynight.plugin.utils.ColorUtils.getSchemeForName;
-
 import com.daynight.plugin.actions.ChangeIdeAppearanceAction;
 import com.daynight.plugin.services.PluginPropertiesStateService;
 import com.daynight.plugin.services.StatusBatWidgetInitService;
 import com.daynight.plugin.state.PluginPropsState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.StatusBarWidget;
 import com.intellij.util.Consumer;
+import com.intellij.util.ReflectionUtil;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
-import javax.swing.*;
+import javax.swing.Icon;
 
-public class QuickChangeStatusBarWidget implements StatusBarWidget.Multiframe, StatusBarWidget.IconPresentation {
+import static com.daynight.plugin.services.StatusBatWidgetInitService.WidgetState.DAY;
+import static com.daynight.plugin.services.StatusBatWidgetInitService.WidgetState.NIGHT;
+import static com.daynight.plugin.utils.ColorUtils.getSchemeForName;
+import static com.daynight.plugin.utils.ColorUtils.getThemeByName;
 
+public class QuickChangeStatusBarWidget implements StatusBarWidget, StatusBarWidget.IconPresentation {
+    private static final Icon QUICK_SWITCH_ACTION = IconLoader.getIcon("/icon/dayAndNight.png",
+            Objects.requireNonNull(ReflectionUtil.getGrandCallerClass()));
+
+    public static final String WIDGET_ID = "QuickChange";
+
+    private final Project myProject;
     private final Consumer<MouseEvent> clickConsumer;
-    private Project myProject;
 
     public QuickChangeStatusBarWidget(@NotNull Project project) {
-        myProject = project;
-        clickConsumer = new QuickSwitchEvent();
+        this.myProject = project;
+        this.clickConsumer = new QuickSwitchEvent();
     }
 
-    @NotNull
     @Override
-    public String ID() {
-        return "QuickChangeStatusBarWidget";
+    public @NotNull String ID() {
+        return WIDGET_ID;
     }
 
-    @Nullable
     @Override
-    public WidgetPresentation getPresentation() {
+    public @Nullable WidgetPresentation getPresentation() {
         return this;
     }
 
     @Override
-    public void install(@NotNull StatusBar statusBar) {
+    public @Nullable Icon getIcon() {
+        return QUICK_SWITCH_ACTION;
     }
 
     @Override
-    public void dispose() {
-        myProject = null;
-    }
-
-    @NotNull
-    @Override
-    public Icon getIcon() {
-        return IconLoader.getIcon("/icon/dayAndNight.png", QuickChangeStatusBarWidget.class);
-    }
-
-    @Override
-    public StatusBarWidget copy() {
-        return new QuickChangeStatusBarWidget(myProject);
-    }
-
-    @NotNull
-    @Override
-    public String getTooltipText() {
-        return "Change IDE appearance";
-    }
-
-    @NotNull
-    @Override
-    public Consumer<MouseEvent> getClickConsumer() {
+    public @Nullable Consumer<MouseEvent> getClickConsumer() {
         return clickConsumer;
+    }
+
+    @Override
+    public @Nullable String getTooltipText() {
+        return "Change IDE appearance";
     }
 
     public class QuickSwitchEvent implements Consumer<MouseEvent> {
@@ -86,21 +73,20 @@ public class QuickChangeStatusBarWidget implements StatusBarWidget.Multiframe, S
             String schemeForUpdate = null;
 
             switch (widget.getState()) {
-                case DAY:
+                case DAY -> {
                     schemeForUpdate = state.getNightSchemeName();
                     themeForUpdate = state.getNightThemeName();
                     widget.updateState(NIGHT);
-                    break;
-
-                case NIGHT:
+                }
+                case NIGHT -> {
                     schemeForUpdate = state.getDaySchemeName();
                     themeForUpdate = state.getDayThemeName();
                     widget.updateState(DAY);
-                    break;
+                }
             }
 
             if (themeForUpdate != null) {
-                ChangeIdeAppearanceAction.changeLaFIfNecessary(getLookAndFeelInfoForName(themeForUpdate), getSchemeForName(schemeForUpdate), state);
+                ChangeIdeAppearanceAction.changeLaFIfNecessary(getThemeByName(themeForUpdate), getSchemeForName(schemeForUpdate), state);
             }
         }
     }

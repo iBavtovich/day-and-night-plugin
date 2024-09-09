@@ -1,9 +1,5 @@
 package com.daynight.plugin.forms;
 
-import static com.daynight.plugin.utils.TimeUtils.getLocalTimeFromMinutes;
-import static com.daynight.plugin.utils.TimeUtils.getTimeInMinutes;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 import com.daynight.plugin.forms.ui.ColorSchemeComboBox;
 import com.daynight.plugin.forms.ui.ThemeComboBox;
 import com.daynight.plugin.services.PluginPropertiesStateService;
@@ -11,22 +7,37 @@ import com.daynight.plugin.state.PluginPropsState;
 import com.github.lgooddatepicker.components.TimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.intellij.ide.ui.LafManager;
+import com.intellij.ide.ui.laf.UIThemeLookAndFeelInfo;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
-import com.intellij.openapi.editor.colors.impl.EditorColorsManagerImpl;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.time.LocalTime;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
-import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.time.LocalTime;
-import java.util.Objects;
+import static com.daynight.plugin.utils.ColorUtils.getThemeByName;
+import static com.daynight.plugin.utils.TimeUtils.getLocalTimeFromMinutes;
+import static com.daynight.plugin.utils.TimeUtils.getTimeInMinutes;
 
-import javax.swing.*;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -46,17 +57,21 @@ public class DayNightConfigurableGUI {
     PluginPropertiesStateService configService;
 
     private void createUIComponents() {
-        EditorColorsManagerImpl editorColorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
+        EditorColorsManager editorColorsManager = EditorColorsManager.getInstance();
         LafManager lafManager = LafManager.getInstance();
 
         configService = PluginPropertiesStateService.getInstance();
         PluginPropsState state = configService.getState();
         fillSettingsWithDefaultsIfNeeded(state);
 
-        dayThemePicker = new ThemeComboBox(lafManager.getInstalledLookAndFeels());
+        Iterator<UIThemeLookAndFeelInfo> iterator = lafManager.getInstalledThemes().iterator();
+        List<UIThemeLookAndFeelInfo> installedThemes = new LinkedList<>();
+        iterator.forEachRemaining(installedThemes::add);
+
+        dayThemePicker = new ThemeComboBox(installedThemes.toArray(UIThemeLookAndFeelInfo[]::new));
         dayThemePicker.setSelectedTheme(getThemeByName(state.getDayThemeName()));
 
-        nightThemePicker = new ThemeComboBox(lafManager.getInstalledLookAndFeels());
+        nightThemePicker = new ThemeComboBox(installedThemes.toArray(UIThemeLookAndFeelInfo[]::new));
         nightThemePicker.setSelectedTheme(getThemeByName(state.getNightThemeName()));
 
         daySchemePicker = new ColorSchemeComboBox(editorColorsManager.getAllSchemes());
@@ -80,14 +95,19 @@ public class DayNightConfigurableGUI {
     }
 
     private void fillSettingsWithDefaultsIfNeeded(PluginPropsState state) {
-        EditorColorsManagerImpl editorColorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
+        EditorColorsManager editorColorsManager = EditorColorsManager.getInstance();
         LafManager lafManager = LafManager.getInstance();
 
+        UIThemeLookAndFeelInfo currentUIThemeLookAndFeel = lafManager.getCurrentUIThemeLookAndFeel();
+        if (currentUIThemeLookAndFeel == null) {
+            return;
+        }
+
         if (isEmpty(state.getDayThemeName())) {
-            state.setDayThemeName(lafManager.getCurrentLookAndFeel().getName());
+            state.setDayThemeName(currentUIThemeLookAndFeel.getName());
         }
         if (isEmpty(state.getNightThemeName())) {
-            state.setNightThemeName(lafManager.getCurrentLookAndFeel().getName());
+            state.setNightThemeName(currentUIThemeLookAndFeel.getName());
         }
         if (isEmpty(state.getDaySchemeName())) {
             state.setDaySchemeName(editorColorsManager.getGlobalScheme().getName());
@@ -111,8 +131,8 @@ public class DayNightConfigurableGUI {
         Component[] components = panel.getComponents();
         for (Component component : components) {
             component.setEnabled(b);
-            if (component instanceof JPanel) {
-                disableAllPanelComponents((JPanel) component, b);
+            if (component instanceof JPanel jPanel) {
+                disableAllPanelComponents(jPanel, b);
             }
         }
     }
@@ -182,21 +202,11 @@ public class DayNightConfigurableGUI {
         dayTimePicker.setTime(getLocalTimeFromMinutes(state.getDayStartTime()));
         nightTimePicker.setTime(getLocalTimeFromMinutes(state.getNightStartTime()));
 
-        EditorColorsManagerImpl editorColorsManager = (EditorColorsManagerImpl) EditorColorsManager.getInstance();
+        EditorColorsManager editorColorsManager = EditorColorsManager.getInstance();
 
         disableSchemePickCheckbox.setSelected(!state.isSchemePickEnabled());
         daySchemePicker.setSelectedScheme(editorColorsManager.getScheme(state.getDaySchemeName()));
         nightSchemePicker.setSelectedScheme(editorColorsManager.getScheme(state.getNightSchemeName()));
-    }
-
-    private UIManager.LookAndFeelInfo getThemeByName(String dayThemeName) {
-        LafManager lafManager = LafManager.getInstance();
-        for (UIManager.LookAndFeelInfo lookAndFeel : lafManager.getInstalledLookAndFeels()) {
-            if (lookAndFeel.getName().equalsIgnoreCase(dayThemeName)) {
-                return lookAndFeel;
-            }
-        }
-        return lafManager.getCurrentLookAndFeel();
     }
 
     {

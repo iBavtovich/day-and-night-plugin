@@ -1,59 +1,69 @@
 buildscript {
     repositories {
-        maven {
-            url 'https://www.jetbrains.com/intellij-repository/releases'
-        }
-        maven {
-            url 'https://www.jetbrains.com/intellij-repository/snapshots'
-        }
+        mavenCentral()
     }
 }
 
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.3.1'
+    id 'org.jetbrains.intellij.platform' version '2.0.1'
 }
 
 group 'com.daynight'
-version '1.2.7'
+version '2.0.0'
 
-sourceCompatibility = 1.8
-
-intellij {
-    version.set('2021.3-SNAPSHOT')
-    type.set('RD')
-    patchPluginXml.sinceBuild = "212.0"
-    // Don't patch `untilBuild` version.
-    patchPluginXml.untilBuild = providers.provider({ null })
-}
+sourceCompatibility = JavaVersion.VERSION_21
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    intellijPlatform {
+        intellijIdeaCommunity '2024.2.0.1'
+        instrumentationTools()
+
+        bundledPlugin 'com.intellij.java'
+    }
+
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
     implementation 'com.github.lgooddatepicker:LGoodDatePicker:11.2.1'
 
     testImplementation 'junit:junit:4.13.2'
 }
 
-repositories {
-    mavenCentral()
-    maven {
-        url 'https://www.jetbrains.com/intellij-repository/releases'
-    }
-    maven {
-        url 'https://www.jetbrains.com/intellij-repository/snapshots'
+intellijPlatform {
+    pluginConfiguration {
+        version = project.version
+
+        changeNotes =
+                """
+              Make compatible with InteliJ products 24.2<br>
+              Get rid of deprecated API usage<br>
+              Make working with Java 21<br>
+              Support dynamic loading of plugin<br>
+              """.stripIndent()
+        ideaVersion {
+            // Don't patch `untilBuild` version.
+            untilBuild = providers.provider({ null })
+            sinceBuild = "242.2"
+        }
     }
 }
 
-patchPluginXml {
-    changeNotes.set(
-        provider {
-          """
-          Updated libs<br>
-          Fix start-up exception, when actions is invoked earlier than ActionaManager is initialized<br>
-          <em>Version: 1.2.7</em>
-          """
-        }
-    )
+runIde {
+    jvmArgs = [
+            "-XX:+UnlockDiagnosticVMOptions"
+    ]
+}
+
+repositories {
+    mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
+}
+
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }

@@ -1,39 +1,40 @@
 package com.daynight.plugin.forms.ui;
 
+import com.intellij.ide.ui.laf.UIThemeLookAndFeelInfo;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.SimpleListCellRenderer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JList;
 
 import static java.util.Objects.isNull;
 
-public class ThemeComboBox extends ComboBox<UIManager.LookAndFeelInfo> {
-    private static final SimpleListCellRenderer<UIManager.LookAndFeelInfo> DEFAULT_RENDERER = new SimpleListCellRenderer<UIManager.LookAndFeelInfo>() {
+public class ThemeComboBox extends ComboBox<UIThemeLookAndFeelInfo> {
+    private static final SimpleListCellRenderer<UIThemeLookAndFeelInfo> DEFAULT_RENDERER = new SimpleListCellRenderer<>() {
         @Override
-        public void customize(@NotNull JList list, UIManager.LookAndFeelInfo value, int index, boolean selected, boolean hasFocus) {
+        public void customize(@NotNull JList list, UIThemeLookAndFeelInfo value, int index, boolean selected, boolean hasFocus) {
             setText(value.getName());
         }
     };
 
-    public ThemeComboBox(UIManager.LookAndFeelInfo[] items){
+    public ThemeComboBox(UIThemeLookAndFeelInfo[] items){
         super(items);
         super.setRenderer(DEFAULT_RENDERER);
     }
 
-    public UIManager.LookAndFeelInfo getSelectedTheme() {
-        return (UIManager.LookAndFeelInfo) super.getSelectedItem();
+    public UIThemeLookAndFeelInfo getSelectedTheme() {
+        return (UIThemeLookAndFeelInfo) super.getSelectedItem();
     }
 
-    public void setSelectedTheme(UIManager.LookAndFeelInfo theme) {
+    public void setSelectedTheme(UIThemeLookAndFeelInfo theme) {
         setSelectedItem(theme);
     }
 
     @Nullable
     public String getSelectedThemeName() {
-        UIManager.LookAndFeelInfo selectedTheme = getSelectedTheme();
+        UIThemeLookAndFeelInfo selectedTheme = getSelectedTheme();
         return isNull(selectedTheme) ? null : selectedTheme.getName();
     }
 }

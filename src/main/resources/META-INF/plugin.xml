@@ -6,18 +6,18 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-
     <applicationListeners>
+        <listener class="com.daynight.plugin.listeners.ChangeLafOnStartUpCustomizer" topic="com.intellij.ide.AppLifecycleListener"/>
         <listener class="com.daynight.plugin.listeners.SubmitTasksOnStartUpListener" topic="com.intellij.ide.AppLifecycleListener"/>
+        <listener class="com.daynight.plugin.listeners.LoadListener" topic="com.intellij.ide.plugins.DynamicPluginListener"/>
     </applicationListeners>
-    <extensions defaultExtensionNs="com.intellij">
 
+    <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable displayName="Day and Night" id="dayNightConfigurable"
                                  instance="com.daynight.plugin.configuration.DayNightConfigurable" dynamic="true" />
 
-        <statusBarWidgetFactory  id="quickChangeWidget"
-                                 implementation="com.daynight.plugin.components.QuickChangeStatusBarWidgetFactory"
-                                 order="last"/>
+        <statusBarWidgetFactory implementation="com.daynight.plugin.components.QuickChangeStatusBarWidgetFactory"
+                                id="QuickChange" order="last"/>
 
         <projectService serviceInterface="com.daynight.plugin.services.StatusBatWidgetInitService"
                         serviceImplementation="com.daynight.plugin.services.impl.StatusBatWidgetInitServiceImpl" />
@@ -26,7 +26,6 @@
                             serviceImplementation="com.daynight.plugin.services.impl.PluginPropertiesStateServiceImpl"/>
         <applicationService serviceInterface="com.daynight.plugin.services.ScheduledTasksService"
                             serviceImplementation="com.daynight.plugin.services.impl.ScheduledTasksServiceImpl"/>
-		<actionConfigurationCustomizer implementation="com.daynight.plugin.listeners.ChangeLafOnStartUpCustomizer"/>
 	</extensions>
 
     <actions>
